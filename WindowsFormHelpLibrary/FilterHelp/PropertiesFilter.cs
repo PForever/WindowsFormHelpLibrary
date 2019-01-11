@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace WindowsFormHelpLibrary.FilterHelp
@@ -16,6 +18,16 @@ namespace WindowsFormHelpLibrary.FilterHelp
         public PropertiesFilter(IEnumerable<PropertyValidate> filters) : base(filters.ToDictionary(f => f.Key.Position, f => f))
         {
 
+        }
+
+        public PropertiesFilter(Type source)
+        {
+            var properties = TypeDescriptor.GetProperties(source);
+            int i = 0;
+            foreach (PropertyDescriptor propertyDescriptor in properties)
+            {
+                Add(new PropertyValidate(propertyDescriptor.PropertyType, (i++, propertyDescriptor.Name)));
+            }
         }
 
         public static string GetFilterExpression(

@@ -11,7 +11,7 @@ using DynamicExpression = System.Linq.Dynamic.DynamicExpression;
 
 namespace WindowsFormHelpLibrary.SortableBindingList
 {
-    class SortableBindingList<T> : IList<T>, IReadOnlyList<T>, ICancelAddNew, IRaiseItemChangedEvents, IBindingListView
+    public class SortableBindingList<T> : IList<T>, IReadOnlyList<T>, ICancelAddNew, IRaiseItemChangedEvents, IBindingListView
     {
         private BindingList<T> _innerList = new BindingList<T>();
 

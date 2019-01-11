@@ -69,8 +69,8 @@ namespace WindowsFormHelpLibrary
             {
                 var row = dgvFilters.Rows[e.RowIndex];
                 if(row.IsNewRow) return;
+                _filters[((KvP) bsFilters[e.RowIndex]).Position].Value = null;
                 dgvFilters.Rows.RemoveAt(e.RowIndex);
-                _filters[e.RowIndex].Value = null;
             }
         }
 
