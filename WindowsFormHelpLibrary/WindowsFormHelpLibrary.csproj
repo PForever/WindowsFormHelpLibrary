@@ -71,7 +71,9 @@
     <Compile Include="FilterEditor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FilterEditor.Designer.cs" />
+    <Compile Include="FilterEditor.Designer.cs" >
+      <DependentUpon>FilterEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="SortableBindingList\ListChangingEventArgs.cs" />
     <Compile Include="FilterHelp\PropertiesFilter.cs" />
     <Compile Include="FilterHelp\PropertyNamePosition.cs" />
@@ -81,7 +83,9 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="FilterEditor.resx" />
+    <EmbeddedResource Include="FilterEditor.resx" >
+      <DependentUpon>FilterEditor.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
