@@ -1,20 +1,62 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using WindowsFormHelpLibrary.FilterHelp;
 using DynamicExpression = System.Linq.Dynamic.DynamicExpression;
 
 namespace WindowsFormHelpLibrary.SortableBindingList
 {
+    public class TypeFilter
+    {
+        public string Filter { get; set; }
+        public IDictionary<string, TypeFilter> PropertyFilters { get; set; }
+        public TypeFilter(string filter)
+        {
+            Filter = filter;
+        }
+        public TypeFilter(string filter, IDictionary<string, TypeFilter> propertyFilters)
+        {
+            Filter = filter;
+            PropertyFilters = propertyFilters;
+        }
+    }
+
+    public class MainBitch
+    {
+        public Bitch Bitch { get; set; }
+    }
+    public class Bitch
+    {
+        public string Name { get; set; }
+        public Owner Owner { get; set; }
+
+        public Bitch(string name, Owner owner)
+        {
+            Name = name;
+            Owner = owner;
+        }
+    }
+
+    public class Owner
+    {
+        public string NameOwner { get; set; }
+        public Owner(string name)
+        {
+            NameOwner = name;
+        }
+    }
+
     public class SortableBindingList<T> : IList<T>, IReadOnlyList<T>, ICancelAddNew, IRaiseItemChangedEvents, IBindingListView
     {
         private BindingList<T> _innerList = new BindingList<T>();
-
+        
         private BindingList<T> InnerList
         {
             get => _innerList;
@@ -147,6 +189,7 @@ namespace WindowsFormHelpLibrary.SortableBindingList
             string filter = PropertiesFilter.GetFilterExpression(values);
             ApplyFilterPrivate(filter);
         }
+
         public void ApplyFilter(params (string propertyName, string pattern)[] values)
         {
             if (IsFiltered) RemoveFilterPrivate();
@@ -157,8 +200,8 @@ namespace WindowsFormHelpLibrary.SortableBindingList
         public void ApplyFilterPrivate(string filter)
         {
             _filterString = filter;
-            FilterValidation = DynamicExpression.ParseLambda<T, bool>(filter, FilterExpression).Compile();
-            ApplyFilterPrivate(FilterValidation);
+            var filterValidation = DynamicExpression.ParseLambda<T, bool>(filter, FilterExpression).Compile();
+            ApplyFilterPrivate(filterValidation);
         }
         public void ApplyFilter(string filter)
         {
@@ -188,8 +231,7 @@ namespace WindowsFormHelpLibrary.SortableBindingList
             var items = newInnerList;
             _innerList = new BindingList<T>(items);
         }
-
-        //TODO оптимизация
+        [Obsolete("перенести в использование на стороне фильтра")]
         private static Expression<Func<string, string, bool>> FilterExpression { get; } = (value, pattern) => !String.IsNullOrEmpty(value) && Regex.IsMatch(value, pattern);
 
         private void RemoveFilterPrivate()
