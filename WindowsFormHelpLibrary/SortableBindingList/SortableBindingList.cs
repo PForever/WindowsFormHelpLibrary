@@ -17,43 +17,23 @@ namespace WindowsFormHelpLibrary.SortableBindingList
     {
         public string Filter { get; set; }
         public IDictionary<string, TypeFilter> PropertyFilters { get; set; }
+        public Delegate Predicate { get; set; }
         public TypeFilter(string filter)
         {
             Filter = filter;
         }
-        public TypeFilter(string filter, IDictionary<string, TypeFilter> propertyFilters)
+        public TypeFilter(IDictionary<string, TypeFilter> propertyFilters)
         {
-            Filter = filter;
             PropertyFilters = propertyFilters;
         }
-    }
-
-    public class MainBitch
-    {
-        public Bitch Bitch { get; set; }
-    }
-    public class Bitch
-    {
-        public string Name { get; set; }
-        public Owner Owner { get; set; }
-
-        public Bitch(string name, Owner owner)
+        public TypeFilter(Delegate predicate)
         {
-            Name = name;
-            Owner = owner;
+            Predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
         }
+        public static TypeFilter Create<T>(Func<T, bool> predicate) => new TypeFilter(predicate);
     }
 
-    public class Owner
-    {
-        public string NameOwner { get; set; }
-        public Owner(string name)
-        {
-            NameOwner = name;
-        }
-    }
-
-    public class SortableBindingList<T> : IList<T>, IReadOnlyList<T>, ICancelAddNew, IRaiseItemChangedEvents, IBindingListView
+    public class SortableBindingList<T> : IList<T>, IReadOnlyList<T>, ICancelAddNew, IRaiseItemChangedEvents, IBindingListView, IDynamicFiltrable
     {
         private BindingList<T> _innerList = new BindingList<T>();
         
@@ -184,18 +164,18 @@ namespace WindowsFormHelpLibrary.SortableBindingList
             if (IsSorted) ResetSortPrivate();
         }
 
-        public void ApplyFilterPrivate(params (string propertyName, string pattern)[] values)
-        {
-            string filter = PropertiesFilter.GetFilterExpression(values);
-            ApplyFilterPrivate(filter);
-        }
+        //public void ApplyFilterPrivate(params (string propertyName, string pattern)[] values)
+        //{
+        //    string filter = PropertiesFilter.GetFilterExpression(values);
+        //    ApplyFilterPrivate(filter);
+        //}
 
-        public void ApplyFilter(params (string propertyName, string pattern)[] values)
-        {
-            if (IsFiltered) RemoveFilterPrivate();
-            ApplyFilterPrivate(values);
-            ResetInnerList();
-        }
+        //public void ApplyFilter(params (string propertyName, string pattern)[] values)
+        //{
+        //    if (IsFiltered) RemoveFilterPrivate();
+        //    ApplyFilterPrivate(values);
+        //    ResetInnerList();
+        //}
 
         public void ApplyFilterPrivate(string filter)
         {
@@ -212,7 +192,20 @@ namespace WindowsFormHelpLibrary.SortableBindingList
             ApplyFilterPrivate(filter);
             ResetInnerList();
         }
-
+        public void ApplyFilterPrivate(PropertiesFilter filter)
+        {
+            var propertyFilters = FilterHelper.FilterConverter(filter);
+            if (propertyFilters == null) return;
+            var validator = PropertiesFilter.CreateFilter<T>(propertyFilters);
+            ApplyFilterPrivate(validator);
+        }
+        public void ApplyFilter(PropertiesFilter filter)
+        {
+            if(filter == null) throw new ArgumentNullException(nameof(filter));
+            if (IsFiltered) RemoveFilterPrivate();
+            ApplyFilterPrivate(filter);
+            ResetInnerList();
+        }
         public void ApplyFilterPrivate(Func<T, bool> filter)
         {
             FilterValidation = filter;

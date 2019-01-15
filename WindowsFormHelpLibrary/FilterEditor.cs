@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WindowsFormHelpLibrary.FilterHelp;
 
@@ -28,7 +30,7 @@ namespace WindowsFormHelpLibrary
 
         private void OnOk(object sender, EventArgs e)
         {
-            foreach (var kvP in Enumerable.Cast<KvP>(bsFilters))
+            foreach (var kvP in bsFilters.Cast<KvP>())
             {
                 _filters[kvP.Position].Value = kvP.Value;
             }
@@ -63,13 +65,13 @@ namespace WindowsFormHelpLibrary
             }
         }
 
-        private void OnFilterCellClicked(object sender, DataGridViewCellEventArgs e)
+        private void OnFilterCellContentClicked(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == btFilterDelete.Index)
+            if (e.ColumnIndex == btFilterDelete.Index && e.RowIndex >= 0)
             {
                 var row = dgvFilters.Rows[e.RowIndex];
                 if(row.IsNewRow) return;
-                _filters[((KvP) bsFilters[e.RowIndex]).Position].Value = null;
+                _filters[((KvP)row.DataBoundItem).Position].Value = null;
                 dgvFilters.Rows.RemoveAt(e.RowIndex);
             }
         }
@@ -116,6 +118,118 @@ namespace WindowsFormHelpLibrary
             public KvP()
             {
                 Position = -1;
+            }
+        }
+
+        private void OnFilterCellDoubleClicked(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == tbValue.Index)
+            {
+                var property = (KvP) bsFilters[e.RowIndex];
+                var propertyInfo = _filters[property.Position];
+                var type = propertyInfo.PropertyType;
+                if(type.IsPrimitive || type == typeof(string)) return;
+                if(type == typeof(DateTime)) CreateDateTimeFilter(propertyInfo, property);
+                else CreateInnerFilter(propertyInfo, property);
+            }
+        }
+
+        private void CreateDateTimeFilter(PropertyValidate propertyInfo, KvP property)
+        {
+            Func<DateTime, bool> Between(DateTime from, DateTime to) => src => from <= src && src <= to;
+            var intervalPicker = new IntervalPicker();
+            switch (intervalPicker.ShowDialog())
+            {
+                case DialogResult.OK:
+                    property.Value = Between(intervalPicker.From, intervalPicker.To);
+                    bsFilters.ResetCurrentItem();
+                    break;
+                case DialogResult.Cancel:
+                    break;
+                case DialogResult.Abort:
+                    property.Value = null;
+                    bsFilters.ResetCurrentItem();
+                    break;
+            }
+        }
+
+        private void CreateInnerFilter(PropertyValidate propertyInfo, KvP property)
+        {
+            var filter = new PropertiesFilter(propertyInfo.PropertyType);
+            switch (new FilterEditor(filter).ShowDialog())
+            {
+                case DialogResult.OK:
+                    property.Value = filter;
+                    bsFilters.ResetCurrentItem();
+                    break;
+                case DialogResult.Cancel:
+                    break;
+                case DialogResult.Abort:
+                    property.Value = null;
+                    bsFilters.ResetCurrentItem();
+                    break;
+            }
+        }
+
+        private void OnFilterCellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex == tbValue.Index)
+            {
+                var row = dgvFilters.Rows[e.RowIndex];
+                if (row.IsNewRow) return;
+                var property = (KvP)row.DataBoundItem;
+                var propertyInfo = _filters[property.Position];
+                var type = propertyInfo.PropertyType;
+                if (type.IsPrimitive || type == typeof(string) || propertyInfo.SourceList != null) return;
+                e.Value = property.Value != null ? "ФИЛЬТР УСТАНОВЛЕН" : "ФИЛЬТР НЕ УСТАНОВЛЕН";
+                e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Italic);
+                e.CellStyle.BackColor = Color.Orange;
+                e.CellStyle.SelectionBackColor = Color.Red;
+                var cell = row.Cells[e.ColumnIndex];
+                e.FormattingApplied = true;
+            }
+        }
+        private bool CheckType(Type type) => type.IsPrimitive || type == typeof(string) || type == typeof(DateTime);
+
+        private void OnFilterCellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+        }
+
+        private void OnFilterCellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+
+        }
+        private static AutoCompleteStringCollection CreateAutoCompleteSource(IEnumerable<string> sourceList)
+        {
+            var result = new AutoCompleteStringCollection();
+            foreach (string s in sourceList)
+            {
+                result.Add(s);
+            }
+            return result;
+        }
+
+        private void OnFilterCellClicked(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == tbValue.Index)
+            {
+                var tb = (TextBox)dgvFilters.EditingControl;
+                if (tb.AutoCompleteMode != AutoCompleteMode.None) return;
+
+                var row = dgvFilters.Rows[e.RowIndex];
+                KvP property;
+                if (row.IsNewRow)
+                {
+                    int position = (int)dgvFilters[cbName.Index, e.RowIndex].Value;
+                    property = bsFilters.Cast<KvP>().First(kvp => kvp.Position == position);
+                }
+                else property = (KvP)row.DataBoundItem;
+                var propertyInfo = _filters[property.Position];
+                if (propertyInfo.SourceList == null) return;
+
+                tb.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                tb.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                tb.AutoCompleteCustomSource = CreateAutoCompleteSource(propertyInfo.SourceList.Keys);
             }
         }
     }

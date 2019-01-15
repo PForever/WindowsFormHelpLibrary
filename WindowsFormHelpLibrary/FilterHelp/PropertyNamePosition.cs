@@ -8,19 +8,30 @@ namespace WindowsFormHelpLibrary.FilterHelp
         {
             return new PropertyNamePosition(tuple.Item1, tuple.Item2);
         }
-        public PropertyNamePosition(int position, string name)
+        public static implicit operator PropertyNamePosition(ValueTuple<int, string, string> tuple)
+        {
+            return new PropertyNamePosition(tuple.Item1, tuple.Item2, tuple.Item3);
+        }
+        public PropertyNamePosition(int position, string name) : this(position, name, name)
+        {
+        }
+
+        public PropertyNamePosition(int position, string name, string displayName)
         {
             Position = position;
             Name = name;
+            DisplayName = displayName;
         }
+
         public PropertyNamePosition()
         {
             Position = -1;
             Name = "";
+            DisplayName = "";
         }
         public int Position { get; set; }
         public string Name { get; set; }
-
+        public string DisplayName {get; set;}
         public bool Equals(PropertyNamePosition other)
         {
             if (ReferenceEquals(null, other)) return false;
