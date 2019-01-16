@@ -66,36 +66,6 @@ namespace WindowsFormHelpLibrary.FilterHelp
             else throw new ArgumentException();
         }
 
-        //public static string GetFilterExpression(params (string propertyName, string pattern)[] values)
-        //{
-        //    string filter = "1 == 1";
-        //    int i = values.Length - 1;
-        //    foreach (var (propertyName, pattern) in values)
-        //    {
-        //        filter += $" && iif(it.{propertyName} != null, @0(it.{propertyName}.ToString(), \"{pattern}\"), false)";
-        //    }
-        //    return filter;
-        //}
-
-        //public (string propertyName, string pattern)[] GetFilterParameters()
-        //{
-        //    var values = new List<(string propertyName, string pattern)>(Count);
-        //    foreach (var current in this.Select(kvp => kvp.Value).Where(f => f.Value != null))
-        //    {
-        //        values.Add((current.Key.Name, GetPattern(current.Value.ToString())));
-        //    }
-        //    return values.ToArray();
-        //}
-
-        //public override string ToString() => GetFilterExpression(GetFilterParameters());
-
-        //private string GetPattern(string valueValue)
-        //{
-        //    string pattern = "";
-        //    foreach (char c in valueValue) pattern += $"[{c}]+.*";
-        //    return pattern;
-        //}
-
         public void Add(PropertyValidate value)
         {
             base.Add(value.Key.Position, value);
@@ -198,7 +168,9 @@ namespace WindowsFormHelpLibrary.FilterHelp
             var property = Expression.Property(parameter, propertyName);
             var filterConst = Expression.Constant(filter, typeof(TypeFilter));
             var validator = Expression.Call(PredicateExpressionInfo, filterConst);
-            var propertyAsObject = Expression.Convert(property, typeof(object));
+            var argType = filter.Predicate.Method.GetParameters()[0].ParameterType;
+            var convertedProperty = Expression.Convert(property, argType);
+            var propertyAsObject = Expression.Convert(convertedProperty, typeof(object));
             var propertyArray = Expression.NewArrayInit(typeof(object), propertyAsObject);
             var invokeInfo = Expression.Call(validator, nameof(Delegate.DynamicInvoke), null, propertyArray);
             var resultConvert = Expression.Convert(invokeInfo, typeof(bool));

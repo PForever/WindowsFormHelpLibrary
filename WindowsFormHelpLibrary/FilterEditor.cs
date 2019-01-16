@@ -128,12 +128,33 @@ namespace WindowsFormHelpLibrary
                 var property = (KvP) bsFilters[e.RowIndex];
                 var propertyInfo = _filters[property.Position];
                 var type = propertyInfo.PropertyType;
-                if(type.IsPrimitive || type == typeof(string)) return;
                 if(type == typeof(DateTime)) CreateDateTimeFilter(propertyInfo, property);
+                else if(DigitalTypes.Contains(type)) CreateDigitalTimeFilter(propertyInfo, property);
+                else if (type.IsPrimitive || type == typeof(string)) return;
                 else CreateInnerFilter(propertyInfo, property);
             }
         }
 
+        private void CreateDigitalTimeFilter(PropertyValidate propertyInfo, KvP property)
+        {
+            Func<decimal, bool> Between(decimal from, decimal to) => src => from <= src && src <= to;
+            var intervalPicker = new DigitalIntervalPicker(propertyInfo.PropertyType);
+            switch (intervalPicker.ShowDialog())
+            {
+                case DialogResult.OK:
+                    property.Value = Between(intervalPicker.From, intervalPicker.To);
+                    bsFilters.ResetCurrentItem();
+                    break;
+                case DialogResult.Cancel:
+                    break;
+                case DialogResult.Abort:
+                    property.Value = null;
+                    bsFilters.ResetCurrentItem();
+                    break;
+            }
+        }
+
+        private static readonly Type[] DigitalTypes = new Type[] { typeof(byte), typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(float), typeof(double) };
         private void CreateDateTimeFilter(PropertyValidate propertyInfo, KvP property)
         {
             Func<DateTime, bool> Between(DateTime from, DateTime to) => src => from <= src && src <= to;
