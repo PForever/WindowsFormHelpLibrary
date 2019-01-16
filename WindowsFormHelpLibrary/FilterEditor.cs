@@ -15,7 +15,7 @@ namespace WindowsFormHelpLibrary
         private static readonly PropertyNamePosition NonProperty = new PropertyNamePosition(-1, "");
         public FilterEditor(PropertiesFilter filters)
         {
-            _filters = filters;
+            _filters = filters ?? throw new ArgumentNullException(nameof(filters));
             InitializeComponent();
         }
 
