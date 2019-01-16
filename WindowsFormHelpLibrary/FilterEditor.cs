@@ -201,7 +201,7 @@ namespace WindowsFormHelpLibrary
                 var property = (KvP)row.DataBoundItem;
                 var propertyInfo = _filters[property.Position];
                 var type = propertyInfo.PropertyType;
-                if (type.IsPrimitive || type == typeof(string) || propertyInfo.SourceList != null) return;
+                if (type.IsPrimitive && !DigitalTypes.Contains(type) || type == typeof(string) || propertyInfo.SourceList != null) return;
                 e.Value = property.Value != null ? "ФИЛЬТР УСТАНОВЛЕН" : "ФИЛЬТР НЕ УСТАНОВЛЕН";
                 e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Italic);
                 e.CellStyle.BackColor = Color.Orange;
