@@ -130,7 +130,7 @@ namespace WindowsFormHelpLibrary
                 var type = propertyInfo.PropertyType;
                 if(type == typeof(DateTime)) CreateDateTimeFilter(propertyInfo, property);
                 else if(DigitalTypes.Contains(type)) CreateDigitalTimeFilter(propertyInfo, property);
-                else if (type.IsPrimitive || type == typeof(string)) return;
+                else if (type.IsPrimitive || type == typeof(string) || propertyInfo.SourceList != null) return;
                 else CreateInnerFilter(propertyInfo, property);
             }
         }
