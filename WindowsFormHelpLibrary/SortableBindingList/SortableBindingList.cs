@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using WindowsFormHelpLibrary.FilterHelp;
-using DynamicExpression = System.Linq.Dynamic.DynamicExpression;
 
 namespace WindowsFormHelpLibrary.SortableBindingList
 {
@@ -33,28 +30,41 @@ namespace WindowsFormHelpLibrary.SortableBindingList
         public static TypeFilter Create<T>(Func<T, bool> predicate) => new TypeFilter(predicate);
     }
 
-    public class SortableBindingList<T> : IList<T>, IReadOnlyList<T>, ICancelAddNew, IRaiseItemChangedEvents, IBindingListView, IDynamicFiltrable
+    public class SortableBindingList<T> : IList<T>, IReadOnlyList<T>, ICancelAddNew, IRaiseItemChangedEvents, IBindingListView, IDynamicFiltrable, IDisposable
     {
         private BindingList<T> _innerList = new BindingList<T>();
-        
+
+        private void InnerListChanged(object _, ListChangedEventArgs e) => OnListChanged(e);
+        private void InnerAddingNew(object _, AddingNewEventArgs e) => OnAddingNew(e.NewObject);
+
         private BindingList<T> InnerList
         {
             get => _innerList;
             set
             {
-                if (RaisesItemChangedEvents)
-                    foreach (T item in InnerList)
-                        InsertRaiseItemChangedEvents(item);
-
-                void InnerListChanged(object sender, ListChangedEventArgs e) => OnListChanged(e);
-                void InnerAddingNew(object sender, AddingNewEventArgs e) => OnAddingNew(e.NewObject);
-                _innerList.ListChanged -= InnerListChanged;
-                _innerList.AddingNew -= InnerAddingNew;
+                ClearEvents();
                 _innerList = value;
+
+                if (RaisesItemChangedEvents)
+                {
+                    foreach (T item in value)
+                        InsertRaiseItemChangedEvents(item);
+                }
                 _innerList.AddingNew += InnerAddingNew;
                 _innerList.ListChanged += InnerListChanged;
                 OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
             }
+        }
+
+        private void ClearEvents()
+        {
+            if (RaisesItemChangedEvents)
+            {
+                foreach (T item in InnerList)
+                    RemoveRaiseItemChangedEvents(item);
+            }
+            _innerList.ListChanged -= InnerListChanged;
+            _innerList.AddingNew -= InnerAddingNew;
         }
 
         void ResetInnerList() => InnerList = _innerList;
@@ -180,7 +190,7 @@ namespace WindowsFormHelpLibrary.SortableBindingList
         public void ApplyFilterPrivate(string filter)
         {
             _filterString = filter;
-            var filterValidation = DynamicExpression.ParseLambda<T, bool>(filter, FilterExpression).Compile();
+            var filterValidation = System.Linq.Dynamic.DynamicExpression.ParseLambda<T, bool>(filter, FilterExpression).Compile();
             ApplyFilterPrivate(filterValidation);
         }
         public void ApplyFilter(string filter)
@@ -454,6 +464,7 @@ namespace WindowsFormHelpLibrary.SortableBindingList
 
         protected virtual void OnItemChanged(object sender, EventArgs args)
         {
+            if(_innerList == null) return;
             int index = _innerList.IndexOf((T) sender);
             OnListChanged(new ListChangedEventArgs(ListChangedType.ItemChanged, index));
         }
@@ -675,6 +686,13 @@ namespace WindowsFormHelpLibrary.SortableBindingList
             }
 
             ListChanged?.Invoke(this, e);
+        }
+
+        public void Dispose()
+        {
+            ClearEvents();
+            _innerList.Clear();
+            _innerList = null;
         }
 
         public event ListChangedEventHandler ListChanged;

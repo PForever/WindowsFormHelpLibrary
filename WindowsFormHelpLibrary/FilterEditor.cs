@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WindowsFormHelpLibrary.FilterHelp;
 
@@ -123,7 +122,7 @@ namespace WindowsFormHelpLibrary
 
         private void OnFilterCellDoubleClicked(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == tbValue.Index)
+            if (e.ColumnIndex == tbValue.Index && e.RowIndex >= 0)
             {
                 var property = (KvP) bsFilters[e.RowIndex];
                 var propertyInfo = _filters[property.Position];
@@ -201,7 +200,7 @@ namespace WindowsFormHelpLibrary
                 var property = (KvP)row.DataBoundItem;
                 var propertyInfo = _filters[property.Position];
                 var type = propertyInfo.PropertyType;
-                if (type.IsPrimitive && !DigitalTypes.Contains(type) || type == typeof(string) || propertyInfo.SourceList != null) return;
+                if (!IsInnerFilteredType(propertyInfo)) return;
                 e.Value = property.Value != null ? "ФИЛЬТР УСТАНОВЛЕН" : "ФИЛЬТР НЕ УСТАНОВЛЕН";
                 e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Italic);
                 e.CellStyle.BackColor = Color.Orange;
@@ -218,8 +217,26 @@ namespace WindowsFormHelpLibrary
 
         private void OnFilterCellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
-
+            if (e.ColumnIndex == tbValue.Index)
+            {
+                var row = dgvFilters.Rows[e.RowIndex];
+                if (row.IsNewRow) return;
+                var property = (KvP)row.DataBoundItem;
+                var propertyInfo = _filters[property.Position];
+                var type = propertyInfo.PropertyType;
+                if (type.IsPrimitive && !DigitalTypes.Contains(type) || type == typeof(string) || propertyInfo.SourceList != null) return;
+                //tbValue.ReadOnly = true;
+            }
         }
+
+        private void OnFilterCellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == tbValue.Index)
+            {
+                //tbValue.ReadOnly = false;
+            }
+        }
+
         private static AutoCompleteStringCollection CreateAutoCompleteSource(IEnumerable<string> sourceList)
         {
             var result = new AutoCompleteStringCollection();
@@ -232,11 +249,8 @@ namespace WindowsFormHelpLibrary
 
         private void OnFilterCellClicked(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == tbValue.Index)
+            if (e.ColumnIndex == tbValue.Index && e.RowIndex >= 0)
             {
-                var tb = (TextBox)dgvFilters.EditingControl;
-                if (tb.AutoCompleteMode != AutoCompleteMode.None) return;
-
                 var row = dgvFilters.Rows[e.RowIndex];
                 KvP property;
                 if (row.IsNewRow)
@@ -246,12 +260,27 @@ namespace WindowsFormHelpLibrary
                 }
                 else property = (KvP)row.DataBoundItem;
                 var propertyInfo = _filters[property.Position];
+
+                var type = propertyInfo.PropertyType;
+                if (IsInnerFilteredType(propertyInfo))
+                {
+                    //tbValue.ReadOnly = true;
+                    return;
+                }
+
                 if (propertyInfo.SourceList == null) return;
+
+                var tb = (TextBox)dgvFilters.EditingControl;
+                if (tb.AutoCompleteMode != AutoCompleteMode.None) return;
 
                 tb.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                 tb.AutoCompleteSource = AutoCompleteSource.CustomSource;
                 tb.AutoCompleteCustomSource = CreateAutoCompleteSource(propertyInfo.SourceList.Keys);
             }
         }
+
+        bool IsInnerFilteredType(PropertyValidate propertyInfo) => (!propertyInfo.PropertyType.IsPrimitive || DigitalTypes.Contains(propertyInfo.PropertyType)) &&
+                                                                   propertyInfo.PropertyType != typeof(string) && propertyInfo.SourceList == null;
+
     }
 }

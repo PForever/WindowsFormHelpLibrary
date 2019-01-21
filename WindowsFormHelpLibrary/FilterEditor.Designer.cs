@@ -33,22 +33,23 @@ namespace WindowsFormHelpLibrary
             this.components = new System.ComponentModel.Container();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgvFilters = new System.Windows.Forms.DataGridView();
-            this.cbName = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.bsProperties = new System.Windows.Forms.BindingSource(this.components);
-            this.btFilterDelete = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.tbValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.bsFilters = new System.Windows.Forms.BindingSource(this.components);
             this.btDelete = new System.Windows.Forms.Button();
             this.btOk = new System.Windows.Forms.Button();
             this.btCancel = new System.Windows.Forms.Button();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.bsProperties = new System.Windows.Forms.BindingSource(this.components);
+            this.cbName = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.btFilterDelete = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.tbValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFilters)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bsProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bsFilters)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bsProperties)).BeginInit();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -93,46 +94,14 @@ namespace WindowsFormHelpLibrary
             this.dgvFilters.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnFilterCellClicked);
             this.dgvFilters.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnFilterCellContentClicked);
             this.dgvFilters.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnFilterCellDoubleClicked);
+            this.dgvFilters.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.OnFilterCellEndEdit);
             this.dgvFilters.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.OnFilterCellFormatting);
             this.dgvFilters.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.OnFilterCellPainting);
             this.dgvFilters.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.OnFilterCellValidating);
             // 
-            // cbName
-            // 
-            this.cbName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.cbName.DataPropertyName = "Position";
-            this.cbName.DataSource = this.bsProperties;
-            this.cbName.DisplayMember = "DisplayName";
-            this.cbName.HeaderText = "Имя столбца";
-            this.cbName.Name = "cbName";
-            this.cbName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.cbName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.cbName.ValueMember = "Position";
-            this.cbName.Width = 98;
-            // 
-            // bsProperties
-            // 
-            this.bsProperties.DataSource = typeof(WindowsFormHelpLibrary.FilterHelp.PropertyNamePosition);
-            // 
-            // btFilterDelete
-            // 
-            this.btFilterDelete.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.btFilterDelete.HeaderText = "Удалить";
-            this.btFilterDelete.Name = "btFilterDelete";
-            this.btFilterDelete.Text = "Удалить";
-            this.btFilterDelete.UseColumnTextForButtonValue = true;
-            this.btFilterDelete.Width = 56;
-            // 
-            // tbValue
-            // 
-            this.tbValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.tbValue.DataPropertyName = "Value";
-            this.tbValue.HeaderText = "Значение";
-            this.tbValue.Name = "tbValue";
-            // 
             // bsFilters
             // 
-            this.bsFilters.DataSource = typeof(WindowsFormHelpLibrary.FilterEditor.KvP);
+            this.bsFilters.DataSource = typeof(FilterEditor.KvP);
             this.bsFilters.AddingNew += new System.ComponentModel.AddingNewEventHandler(this.OnAddingFilter);
             this.bsFilters.ListChanged += new System.ComponentModel.ListChangedEventHandler(this.OnFiltersChanged);
             // 
@@ -178,6 +147,47 @@ namespace WindowsFormHelpLibrary
             this.dataGridViewTextBoxColumn1.HeaderText = "Значение";
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "Value";
+            this.dataGridViewTextBoxColumn2.HeaderText = "Значение";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            // 
+            // bsProperties
+            // 
+            this.bsProperties.DataSource = typeof(PropertyNamePosition);
+            // 
+            // cbName
+            // 
+            this.cbName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.cbName.DataPropertyName = "Position";
+            this.cbName.DataSource = this.bsProperties;
+            this.cbName.DisplayMember = "DisplayName";
+            this.cbName.HeaderText = "Имя столбца";
+            this.cbName.Name = "cbName";
+            this.cbName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.cbName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.cbName.ValueMember = "Position";
+            this.cbName.Width = 98;
+            // 
+            // btFilterDelete
+            // 
+            this.btFilterDelete.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.btFilterDelete.HeaderText = "Удалить";
+            this.btFilterDelete.Name = "btFilterDelete";
+            this.btFilterDelete.Text = "Удалить";
+            this.btFilterDelete.UseColumnTextForButtonValue = true;
+            this.btFilterDelete.Width = 56;
+            // 
+            // tbValue
+            // 
+            this.tbValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.tbValue.DataPropertyName = "Value";
+            this.tbValue.HeaderText = "Значение";
+            this.tbValue.Name = "tbValue";
+            // 
             // FilterEditor
             // 
             this.AcceptButton = this.btOk;
@@ -193,8 +203,8 @@ namespace WindowsFormHelpLibrary
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvFilters)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bsProperties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bsFilters)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bsProperties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -209,6 +219,7 @@ namespace WindowsFormHelpLibrary
         private System.Windows.Forms.BindingSource bsFilters;
         private System.Windows.Forms.BindingSource bsProperties;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewComboBoxColumn cbName;
         private System.Windows.Forms.DataGridViewButtonColumn btFilterDelete;
         private System.Windows.Forms.DataGridViewTextBoxColumn tbValue;

@@ -1,16 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Linq.Dynamic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using DynamicExpression =  System.Linq.Dynamic.DynamicExpression;
 using TypeFilter = WindowsFormHelpLibrary.SortableBindingList.TypeFilter;
-using System.Collections;
 
 namespace WindowsFormHelpLibrary.FilterHelp
 {

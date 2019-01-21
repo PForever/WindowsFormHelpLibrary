@@ -81,20 +81,20 @@
       <DependentUpon>FilterEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="FilterHelp\FilterConverter.cs" />
+    <Compile Include="FilterHelp\PropertiesFilter.cs" />
+    <Compile Include="FilterHelp\PropertyNamePosition.cs" />
+    <Compile Include="FilterHelp\PropertyValidate.cs" />
     <Compile Include="IntervalPicker.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="IntervalPicker.Designer.cs">
       <DependentUpon>IntervalPicker.cs</DependentUpon>
     </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SortableBindingList\Extentions.cs" />
     <Compile Include="SortableBindingList\IDynamicFiltrable.cs" />
     <Compile Include="SortableBindingList\ListChangingEventArgs.cs" />
-    <Compile Include="FilterHelp\PropertiesFilter.cs" />
-    <Compile Include="FilterHelp\PropertyNamePosition.cs" />
-    <Compile Include="FilterHelp\PropertyValidate.cs" />
     <Compile Include="SortableBindingList\SortableBindingList.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeIntervalPicker.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,6 +102,11 @@
       <DependentUpon>TimeIntervalPicker.cs</DependentUpon>
     </Compile>
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\DataSources\WindowsFormHelpLibrary.FilterHelp.PropertyNamePosition.datasource" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DigitalIntervalPicker.resx">
@@ -116,11 +121,6 @@
     <EmbeddedResource Include="TimeIntervalPicker.resx">
       <DependentUpon>TimeIntervalPicker.cs</DependentUpon>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="Properties\DataSources\WindowsFormHelpLibrary.FilterHelp.PropertyNamePosition.datasource" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
